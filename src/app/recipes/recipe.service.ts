@@ -22,12 +22,12 @@ export class RecipeService {
 
   constructor(private shoppingListService: ShoppingListService) {}
 
-  getRecipes() {
+  getRecipes(): Recipe[] {
     return [...this.recipes];
   }
 
-  getRecipe(id: number) {
-    return this.getRecipes()[id];
+  getRecipe(index: number): Recipe {
+    return { ...this.recipes[index] };
   }
 
   addIngredientsToShoppingList(ingredients: Ingredient[]) {
