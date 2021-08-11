@@ -8,14 +8,14 @@ import { RecipeService } from '../recipes/recipe.service';
 @Injectable({ providedIn: 'root' })
 export class DataStorageService {
   firebaseUrl =
-    'https://shopping-d6e26-default-rtdb.asia-southeast1.firebasedatabase.app/';
+    'https://ng-shopping-guide-default-rtdb.asia-southeast1.firebasedatabase.app/';
 
   constructor(private http: HttpClient, private recipeService: RecipeService) {}
 
-  storeRecipes() {
+  storeRecipes(): void {
     const recipes = this.recipeService.getRecipes();
 
-    return this.http
+    this.http
       .put(`${this.firebaseUrl}/recipes.json`, recipes)
       .subscribe((response) => {
         console.log(response);
