@@ -12,7 +12,7 @@ import * as fromApp from '../../store/app.reducer';
 export class RecipeEffects {
   fetchRecipes$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(RecipesActions.FETCH_RECIPES),
+      ofType(RecipesActions.fetchRecipes),
       switchMap(() => {
         return this.http.get<Recipe[]>(`${environment.firebaseUrl}/recipes.json`)
       }),
@@ -25,14 +25,14 @@ export class RecipeEffects {
         });
       }),
       map(recipes => {
-        return new RecipesActions.SetRecipes(recipes)
+        return RecipesActions.setRecipes({ recipes });
       })
     );
   });
 
   storeRecipes$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(RecipesActions.STORE_RECIPES),
+      ofType(RecipesActions.storeRecipes),
       withLatestFrom(this.store.select('recipes')),
       switchMap(([_, recipesState]) => {
         return this.http.put(

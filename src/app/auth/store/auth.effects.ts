@@ -29,19 +29,19 @@ const handleAuthentication = (
   const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
   const user = new User(email, userId, token, expirationDate);
   localStorage.setItem('userData', JSON.stringify(user));
-  return new AuthActions.AuthenticateSuccess({
+  return AuthActions.authenticateSuccess({
     email: email,
     userId: userId,
     token: token,
     expirationDate: expirationDate,
-    redirect: true
+    redirect: true,
   });
 };
 
 const handleError = (errorResponse: any) => {
   let errorMessage = 'An unknown error occurred!';
   if (!errorResponse.error || !errorResponse.error.error) {
-    return of(new AuthActions.AuthenticateFail(errorMessage));
+    return of(AuthActions.authenticateFail({ errorMessage }));
   }
 
   switch (errorResponse.error.error.message) {
@@ -54,21 +54,21 @@ const handleError = (errorResponse: any) => {
       break;
   }
 
-  return of(new AuthActions.AuthenticateFail(errorMessage));
+  return of(AuthActions.authenticateFail({ errorMessage }));
 };
 
 @Injectable()
 export class AuthEffects {
-  authSignup$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(AuthActions.SIGNUP_START),
-      switchMap((signupAction: AuthActions.SignupStart) => {
+  authSignup$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.signupStart),
+      switchMap((action) => {
         return this.http
           .post<AuthResponseData>(
             `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${environment.apiKey}`,
             {
-              email: signupAction.payload.email,
-              password: signupAction.payload.password,
+              email: action.email,
+              password: action.password,
               returnSecureToken: true,
             }
           )
@@ -89,19 +89,19 @@ export class AuthEffects {
             })
           );
       })
-    );
-  });
+    )
+  );
 
-  authLogin$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(AuthActions.LOGIN_START),
-      switchMap((authData: AuthActions.LoginStart) => {
+  authLogin$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.loginStart),
+      switchMap((action) => {
         return this.http
           .post<AuthResponseData>(
             `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.apiKey}`,
             {
-              email: authData.payload.email,
-              password: authData.payload.password,
+              email: action.email,
+              password: action.password,
               returnSecureToken: true,
             }
           )
@@ -122,26 +122,21 @@ export class AuthEffects {
             })
           );
       })
-    );
-  });
+    )
+  );
 
   authRedirect$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AuthActions.AUTHENTICATE_SUCCESS),
-        tap((authSuccessAction: AuthActions.AuthenticateSuccess) => {
-          if (authSuccessAction.payload.redirect) {
-            this.router.navigate(['/']);
-          }
-        })
-      );
-    },
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.authenticateSuccess),
+        tap((action) => action.redirect && this.router.navigate(['/']))
+      ),
     { dispatch: false }
   );
 
-  autoLogin$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(AuthActions.AUTO_LOGIN),
+  autoLogin$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.autoLogin),
       map(() => {
         const userData = localStorage.getItem('userData');
         if (!userData) {
@@ -166,30 +161,29 @@ export class AuthEffects {
             new Date(user._tokenExpirationDate).getTime() -
             new Date().getTime();
           this.authService.setLogoutTimer(expirationDuration);
-          return new AuthActions.AuthenticateSuccess({
+          return AuthActions.authenticateSuccess({
             email: loadedUser.email,
             userId: loadedUser.id,
             token: loadedUser.token,
             expirationDate: new Date(user._tokenExpirationDate),
-            redirect: false
+            redirect: false,
           });
         }
         return { type: 'DUMMY' };
       })
-    );
-  });
+    )
+  );
 
   authLogout$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AuthActions.LOGOUT),
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.logout),
         tap(() => {
           this.authService.clearLogoutTimer();
           localStorage.removeItem('userData');
           this.router.navigate(['/auth']);
         })
-      );
-    },
+      ),
     { dispatch: false }
   );
 
