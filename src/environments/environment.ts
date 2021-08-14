@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
   apiKey: '',
+  firebaseUrl: 'https://ng-shopping-guide-default-rtdb.asia-southeast1.firebasedatabase.app/'
 };
 
 /*
