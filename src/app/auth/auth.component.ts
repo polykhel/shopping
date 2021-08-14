@@ -71,6 +71,12 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.error = null;
   }
 
+  ngOnDestroy() {
+    if (this.closeSubscription) {
+      this.closeSubscription.unsubscribe();
+    }
+  }
+
   private showErrorAlert(message: string) {
     const alertComponentFactory =
       this.componentFactoryResolver.resolveComponentFactory(AlertComponent);
@@ -87,11 +93,5 @@ export class AuthComponent implements OnInit, OnDestroy {
       }
       hostViewContainerRef.clear();
     });
-  }
-
-  ngOnDestroy() {
-    if (this.closeSubscription) {
-      this.closeSubscription.unsubscribe();
-    }
   }
 }

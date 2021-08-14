@@ -20,12 +20,46 @@ export class RecipeEditComponent implements OnInit {
     private router: Router
   ) {}
 
+  get ingredientsControl(): FormArray {
+    return this.recipeForm.get('ingredients') as FormArray;
+  }
+
   ngOnInit(): void {
     this.route.paramMap.subscribe((paramMap: ParamMap) => {
       this.id = paramMap.has('id') ? Number(paramMap.get('id')) : null;
       this.editMode = this.id !== null;
       this.initForm();
     });
+  }
+
+  onSubmit() {
+    const newRecipe = this.recipeForm.value as Recipe;
+    if (this.editMode && this.id !== null) {
+      this.recipeService.updateRecipe(this.id, newRecipe);
+    } else {
+      this.recipeService.addRecipe(newRecipe);
+    }
+    this.onCancel();
+  }
+
+  onAddIngredient() {
+    this.ingredientsControl.push(
+      new FormGroup({
+        name: new FormControl(null, Validators.required),
+        amount: new FormControl(null, [
+          Validators.required,
+          Validators.pattern(/^[1-9]+[0-9]*$/),
+        ]),
+      })
+    );
+  }
+
+  onDeleteIngredient(index: number) {
+    this.ingredientsControl.removeAt(index);
+  }
+
+  onCancel() {
+    this.router.navigate(['../'], { relativeTo: this.route });
   }
 
   private initForm() {
@@ -63,39 +97,5 @@ export class RecipeEditComponent implements OnInit {
       description: new FormControl(recipeDescription, Validators.required),
       ingredients: recipeIngredients,
     });
-  }
-
-  onSubmit() {
-    const newRecipe = this.recipeForm.value as Recipe;
-    if (this.editMode && this.id !== null) {
-      this.recipeService.updateRecipe(this.id, newRecipe);
-    } else {
-      this.recipeService.addRecipe(newRecipe);
-    }
-    this.onCancel();
-  }
-
-  get ingredientsControl(): FormArray {
-    return this.recipeForm.get('ingredients') as FormArray;
-  }
-
-  onAddIngredient() {
-    this.ingredientsControl.push(
-      new FormGroup({
-        name: new FormControl(null, Validators.required),
-        amount: new FormControl(null, [
-          Validators.required,
-          Validators.pattern(/^[1-9]+[0-9]*$/),
-        ]),
-      })
-    );
-  }
-
-  onDeleteIngredient(index: number) {
-    this.ingredientsControl.removeAt(index);
-  }
-
-  onCancel() {
-    this.router.navigate(['../'], { relativeTo: this.route });
   }
 }

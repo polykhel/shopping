@@ -4,7 +4,8 @@
       <div class="row">
         <div class="row">
           <div class="col-xs-12">
-            <button [disabled]="recipeForm.invalid" class="btn btn-success">Save</button> |
+            <button [disabled]="recipeForm.invalid" class="btn btn-success">Save</button>
+            |
             <button (click)="onCancel()" class="btn btn-danger">Cancel</button>
           </div>
         </div>
@@ -26,7 +27,7 @@
         </div>
         <div class="row">
           <div class="col-xs-12">
-            <img alt="Recipe Preview" class="img-responsive" [src]="imagePath.value">
+            <img [src]="imagePath.value" alt="Recipe Preview" class="img-responsive">
           </div>
         </div>
         <div class="row">
